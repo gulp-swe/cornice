@@ -44,6 +44,7 @@ def rst2html(data):
 class Env(object):
     temp_data = {}
     docname = ''
+    domaindata = dict(http=dict(get={}, put={}, post={}, delete={}))
 
 
 def rst2node(data):

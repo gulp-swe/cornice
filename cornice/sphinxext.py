@@ -1,7 +1,4 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this file,
-# You can obtain one at http://mozilla.org/MPL/2.0/.
-# Contributors: Vincent Fretin
+# copied from mozilla's cornice.sphinxext
 """
 Sphinx extension that displays the API documentation.
 """
@@ -16,7 +13,7 @@ from sphinx.util.docfields import DocFieldTransformer
 from cornice.util import rst2node, to_list
 
 
-def trim(docstring):
+def trim(docstring, indent=0):
     """Implementation taken from
     http://www.python.org/dev/peps/pep-0257/
     """
@@ -26,26 +23,27 @@ def trim(docstring):
     # and split into a list of lines:
     lines = docstring.expandtabs().splitlines()
     # Determine minimum indentation (first line doesn't count):
-    indent = sys.maxint
+    _indent = sys.maxint
     for line in lines[1:]:
         stripped = line.lstrip()
         if stripped:
-            indent = min(indent, len(line) - len(stripped))
+            _indent = min(_indent, len(line) - len(stripped))
     # Remove indentation (first line is special):
     trimmed = [lines[0].strip()]
-    if indent < sys.maxint:
+    if _indent < sys.maxint:
         for line in lines[1:]:
-            trimmed.append(line[indent:].rstrip())
+            trimmed.append(line[_indent:].rstrip())
     # Strip off trailing and leading blank lines:
     while trimmed and not trimmed[-1]:
         trimmed.pop()
     while trimmed and not trimmed[0]:
         trimmed.pop(0)
     # Return a single string:
-    res = '\n'.join(trimmed)
+    res = '\n'.join([' '*indent+line for line in trimmed])
     if not isinstance(res, unicode):
         res = res.decode('utf8')
     return res
+
 
 from sphinx.locale import l_
 from sphinx.util.docfields import Field, GroupedField, TypedField
@@ -58,7 +56,9 @@ class ServiceDirective(Directive):
     has_content = True
     option_spec = {'package': directives.unchanged,
                    'service': directives.unchanged}
+
     domain = 'py'
+
     # copied from sphinx.domains.python.PyObject
     doc_field_types = [
         TypedField('parameter', label=l_('Parameters'),
@@ -80,6 +80,8 @@ class ServiceDirective(Directive):
     ]
 
     def _render_service(self, path, service, methods):
+        rst = []
+        
         env = self.state.document.settings.env
         service_id = "service-%d" % env.new_serialno('service')
         service_node = nodes.section(ids=[service_id])
@@ -90,6 +92,12 @@ class ServiceDirective(Directive):
             service_node += rst2node(trim(service.description))
 
         for method, info in methods.items():
+            rst.append('.. http:%s:: %s\n' % (method.lower(), service.route_name))
+            rst.append(trim(service.description, indent=3))
+            rst.append(trim(info['func'].__doc__ or "", indent=3))
+            rst.append('')
+            
+            
             method_id = '%s-%s' % (service_id, method)
             method_node = nodes.section(ids=[method_id])
             method_node += nodes.title(text=method)
@@ -173,6 +181,7 @@ class ServiceDirective(Directive):
 
             service_node += method_node
 
+        return rst2node('\n'.join(rst))
         return service_node
 
     def _get_services(self, package):
