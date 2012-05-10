@@ -190,7 +190,7 @@ class ServiceDirective(Directive):
         conf.include('cornice')
         conf.scan(package)
         by_service = defaultdict(dict)
-        apidocs = conf.registry.settings.get('apidocs', [])
+        apidocs = conf.registry.settings.get('apidocs', {})
 
         for (path, method), apidoc in apidocs.items():
             service = apidoc['service']
