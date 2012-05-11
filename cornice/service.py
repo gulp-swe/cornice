@@ -89,10 +89,13 @@ class Service(object):
         # to keep the order in which the services have been defined
         self.index = -1
         self.definitions = {}
+        self.depth = kw.pop('depth', 1)
+
 
     def __repr__(self):
         return "<%s Service at %s>" % (self.renderer.capitalize(),
                                        self.route_name)
+
 
     def _define(self, config, method):
         if self.index == -1:
@@ -151,7 +154,6 @@ class Service(object):
         All the constructor options, minus name and path, can be overwritten in
         here.
         """
-
         method = kw.get('request_method', 'GET')  # default is GET
         api_kw = self.kw.copy()
         api_kw.update(kw)
@@ -239,7 +241,7 @@ class Service(object):
                     config.add_view(view=view, route_name=self.route_name,
                                         **view_kw)
 
-            info = venusian.attach(func, callback, category='pyramid')
+            info = venusian.attach(func, callback, depth=self.depth, category='pyramid')
 
             if info.scope == 'class':
                 # if the decorator was attached to a method in a class, or
