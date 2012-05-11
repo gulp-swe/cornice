@@ -38,8 +38,7 @@ def resource(**kw):
 
             # create service
             service_name = prefix + klass.__name__.lower()
-            service = services[service_name] = Service(name=service_name,
-                                                       **service_args)
+            service = services[service_name] = Service(name=service_name, depth=2, **service_args)
 
             # initialize views
             for verb in ('get', 'post', 'put', 'delete'):
