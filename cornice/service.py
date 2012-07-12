@@ -26,11 +26,14 @@ def call_service(func, api_kwargs, context, request):
     # apply validators
     for validator in api_kwargs.get('validators', []):
         validator(request)
-        
+
     if len(request.errors) > 0:
         return json_error(request.errors)
 
-    return dict(result=func(request), status='ok')
+    res = dict(result=func(request), status='ok')
+    request.response.headers['Cache-Control'] = 'no-store'
+    request.response.headers['Expires'] = '-1'
+    return res
 
 
 class Service(object):
