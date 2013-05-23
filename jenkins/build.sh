@@ -10,7 +10,8 @@ fi
 . $PYENV_HOME/bin/activate
 
 pip install --quiet pyramid simplejson docutils unittest2 Sphinx sphinxcontrib-httpdomain webtest Paste PasteScript
-pip install --quiet nose nosexcover coverage colander pylint pep8 pyflakes
+pip install --quiet nose nosexcover coverage pylint pep8 pyflakes
+pip install --quiet colander==0.9.8
 
 cd $WORKSPACE/$1
 nosetests --with-xcoverage --with-xunit
