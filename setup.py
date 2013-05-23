@@ -13,7 +13,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 requires = ['pyramid', 'coverage', 'simplejson',
             'docutils', 'unittest2', 'Sphinx',
             'webtest', 'Paste', 'PasteScript']
-test_requires = requires + ['colander']
+test_requires = requires + ['colander < 1.0']
 
 entry_points = """\
 [paste.paster_create_template]
